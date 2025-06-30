@@ -91,7 +91,6 @@ task downloadWebApiCommanderJar {
         // Create parent directories if they don't exist
         dest.parentFile.mkdirs()
         
-        // Download using Java's built-in URL functionality
         new URL(url).withInputStream { inputStream ->
             dest.withOutputStream { outputStream ->
                 outputStream << inputStream
@@ -118,7 +117,6 @@ task downloadJsonMetadata {
         // Create parent directories if they don't exist
         dest.parentFile.mkdirs()
         
-        // Download using Java's built-in URL functionality
         new URL(url).withInputStream { inputStream ->
             dest.withOutputStream { outputStream ->
                 outputStream << inputStream
