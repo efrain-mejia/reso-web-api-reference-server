@@ -61,7 +61,7 @@ You can have your own SQL database.  Just copy the `env-default` file to `.env` 
 
 ### Prerequisites
 Before running the tests, ensure you have the following installed:
-- **Java 8+** (Ensure it's properly set in your environment)
+- **Java 17** (Ensure it's properly set in your environment)
 - **Gradle**
 - **Docker** (with Docker Compose)
 - **Node.js** (for `reso-certification-utils`)

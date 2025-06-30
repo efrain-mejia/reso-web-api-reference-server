@@ -284,7 +284,7 @@ public class DefinitionBuilder {
                 }
                 // In cases where we have EnumType metadata being used in a String LookupType
                 // server, we must add LookupName annotations
-                if (LOOKUP_TYPE.equals("STRING") && fieldType.equals("Edm.Int64")) {
+                if (LOOKUP_TYPE.equals("STRING") && isFlags) {
                     newField.addAnnotation("Edm.String", "RESO.OData.Metadata.LookupName");
                 }
 

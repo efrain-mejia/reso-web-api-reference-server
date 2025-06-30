@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM debian:bullseye
 
 WORKDIR /usr/src/app
 
@@ -8,16 +8,16 @@ ARG DEBIAN_FRONTEND=noninteractive
 # Install dependencies
 RUN apt-get update && apt-get install -y \
     wget \
-    openjdk-8-jdk \
+    openjdk-11-jdk \
     curl \
     python3-pip \
-    docker-compose \
     git \
-    gradle \
     dos2unix  # ✅ Fix Windows line endings
 
-# Switch to Java 8
-RUN update-java-alternatives -s java-1.8.0-openjdk-amd64
+RUN pip3 install docker-compose
+
+# Switch to Java 11
+RUN update-java-alternatives -s java-1.11.0-openjdk-amd64
 
 # ✅ Explicitly copy Gradle Wrapper and ensure it's executable
 COPY gradlew /usr/src/app/gradlew
