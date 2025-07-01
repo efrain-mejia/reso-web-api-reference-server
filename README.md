@@ -14,7 +14,9 @@ This will create everything to run the test server.
 
 ## Running the server
 
-Run the `run.sh`
+Run the server with `docker-compose up`
+
+To run with debug enabled `docker-compose -f docker-compose.yml -f docker-compose.dev.yml up`
 
 ## Access the Server
 
