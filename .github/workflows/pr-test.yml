@@ -71,7 +71,7 @@ jobs:
     - name: Build the project
       run: |
         echo "Building the project..."
-        docker-compose -f docker-compose.builder.yml --project-name builder-stack up --build
+        docker compose -f docker-compose.builder.yml --project-name builder-stack up --build
         
     - name: Run tests
       run: |
@@ -103,7 +103,7 @@ jobs:
       if: always()
       run: |
         echo "Performing final cleanup of Docker containers..."
-        docker compose -f docker-compose.yml --volumes --remove-orphans || true
+        docker compose down --volumes --remove-orphans || true
         echo "Final cleanup completed"
         
     - name: Upload test results
@@ -115,4 +115,4 @@ jobs:
           build/test-results/
           build/reports/
           results/
-        retention-days: 7 /
+        retention-days: 7
