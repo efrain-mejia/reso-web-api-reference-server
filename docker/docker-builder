@@ -12,24 +12,23 @@ RUN apt-get update && apt-get install -y \
     curl \
     python3-pip \
     git \
-    dos2unix  # ✅ Fix Windows line endings
+    dos2unix \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install docker-compose
 
 # Switch to Java 11
 RUN update-java-alternatives -s java-1.11.0-openjdk-amd64
 
-# ✅ Explicitly copy Gradle Wrapper and ensure it's executable
-COPY gradlew /usr/src/app/gradlew
-COPY gradle /usr/src/app/gradle
+# Copy the entire project structure
+COPY . /usr/src/app/
+
+# Make gradlew executable and fix line endings
 RUN chmod +x /usr/src/app/gradlew && dos2unix /usr/src/app/gradlew
 
-# ✅ Debugging: Check if gradlew exists in the container
-RUN ls -lah /usr/src/app/ && ls -lah /usr/src/app/gradlew
+# Set environment variable for cert report filename
+ARG CERT_REPORT_FILENAME=RESODataDictionary-2.0.metadata-report.json
+ENV CERT_REPORT_FILENAME=${CERT_REPORT_FILENAME}
 
-# Copy project scripts
-COPY docker/scripts/startup.sh /usr/src/app/docker/scripts/
-RUN chmod +x /usr/src/app/docker/scripts/startup.sh && dos2unix /usr/src/app/docker/scripts/startup.sh
-
-# Default command to run the startup script
-CMD ["sh", "/usr/src/app/docker/scripts/startup.sh"]
+# Default command to run the build (inline to avoid file creation issues)
+CMD ["/bin/bash", "-c", "set -e && echo '🧹 Cleaning build directory...' && rm -rf build && echo '🚀 Running Gradle packageCore task...' && ./gradlew packageCore && echo '✅ Gradle packaging successful!'"]

@@ -8,7 +8,7 @@ In order to run your own local server you need a linux / Unix environment with t
 * docker-compose
 * wget or curl
 
-Run the `build.sh`
+Run the `docker-compose -f docker-compose.builder.yml --project-name builder-stack up --build`
 
 This will create everything to run the test server.
 
