@@ -1,0 +1,118 @@
+name: PR Tests
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-all-lookup-types:
+    runs-on: ubuntu-latest
+   
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Clone and build web-api-commander
+      run: |
+        echo "Cloning web-api-commander repository..."
+        git clone https://github.com/RESOStandards/web-api-commander.git ../web-api-commander
+        cd ../web-api-commander
+        echo "Building web-api-commander..."
+        chmod +x gradlew
+        ./gradlew build -x test
+        echo "Web-api-commander built successfully"
+        
+    - name: Install reso-certification-utils
+      run: |
+        echo "Installing reso-certification-utils..."
+        npm install -g RESOStandards/reso-certification-utils
+        echo "Verifying installation..."
+        reso-certification-utils --help
+        
+    - name: Create refServLocal.json configuration
+      run: |
+        echo "Creating refServLocal.json for ${{ matrix.user_config.config_name }}..."
+        cat > refServLocal.json << EOF
+        {
+            "providerUoi": "providerUoi",
+            "configs": [
+                {
+                    "serviceRootUri": "http://localhost:8080/core/2.0.0/",
+                    "recipientUoi": "recipientUoi",
+                    "providerUsi": "providerUsi",
+                    "token": "reso-test-token"
+                }
+            ]
+        }
+        EOF
+        
+    - name: Create base environment files
+      run: |
+        echo "Creating base .env file..."
+        cat > .env << 'EOF'
+        JWT_SECRET=${{ secrets.JWT_SECRET }}
+        EOF
+        
+    - name: Set environment variables
+      run: |
+        echo "WEB_API_COMMANDER_PATH=$GITHUB_WORKSPACE/../web-api-commander" >> $GITHUB_ENV
+      
+    - name: Build the project
+      run: |
+        echo "Building the project..."
+        docker-compose -f docker-compose.builder.yml --project-name builder-stack up --build
+        
+    - name: Run tests
+      run: |
+        echo "######################################################"
+        echo Starting all lookup tests..."
+        echo "######################################################"
+        
+        echo "=== LookupStringTest ==="
+        cat > .env << 'EOF'
+        LOOKUP_TYPE=STRING
+        EOF
+        LOOKUP_TYPE=STRING ./gradlew test --tests org.reso.tests.LookupStringTest --rerun-tasks --info
+        
+        echo "=== LookupEnumFlagsTest with ${{ matrix.user_config.config_name }} ==="
+        cat > .env << 'EOF'
+        LOOKUP_TYPE=ENUM_FLAGS
+        EOF
+        LOOKUP_TYPE=ENUM_FLAGS ./gradlew test --tests org.reso.tests.LookupEnumFlagsTest --rerun-tasks --info
+        
+        echo "=== LookupEnumTest ==="
+        cat > env.test << 'EOF'
+        LOOKUP_TYPE=ENUM_COLLECTION
+        EOF
+        LOOKUP_TYPE=ENUM_COLLECTION ./gradlew test --tests org.reso.tests.LookupEnumTest --rerun-tasks --info
+        
+        echo "All tests completed successfully!"
+        
+    - name: Final cleanup
+      if: always()
+      run: |
+        echo "Performing final cleanup of Docker containers..."
+        docker compose -f docker-compose.yml --volumes --remove-orphans || true
+        echo "Final cleanup completed"
+        
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results
+        path: |
+          build/test-results/
+          build/reports/
+          results/
+        retention-days: 7 /

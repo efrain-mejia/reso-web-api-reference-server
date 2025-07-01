@@ -19,7 +19,7 @@ public class LookupStringTest {
         System.out.println("Starting RESO Reference Server for Enum...");
 
         try {
-            ProcessBuilder builder = new ProcessBuilder("docker", "compose", "up", "-d");
+            ProcessBuilder builder = new ProcessBuilder("docker", "compose", "-f", "docker-compose.yml", "-f", "docker-compose.test.yml", "up", "-d");
             builder.directory(new File(System.getProperty("user.dir")));
             LOGGER.info("Working directory: " + System.getProperty("user.dir"));
             LOGGER.info("Executing command: docker compose up -d");
@@ -27,6 +27,13 @@ public class LookupStringTest {
             Process process = builder.start();
             int exitCode = process.waitFor();
             LOGGER.info("Docker compose process completed with exit code: " + exitCode);
+            
+            if (exitCode == 0) {
+                // Wait for server to be ready
+                TestUtils.waitForServerReady();
+            } else {
+                throw new RuntimeException("Docker compose failed with exit code: " + exitCode);
+            }
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error starting docker containers", e);
             throw e;
@@ -72,8 +79,26 @@ public class LookupStringTest {
         LOGGER.info("========== Test cleanup starting ==========");
         System.out.println("Stopping RESO Reference Server...");
 
-        try {
+        ProcessBuilder builder = new ProcessBuilder(
+          "docker", "compose",
+          "-f", "docker-compose.yml",
+          "-f", "docker-compose.test.yml",
+          "down",            // tear down containers
+          "--volumes",       // remove named & anonymous volumes
+          "--remove-orphans" // clean up any stray related containers
+        );
+        builder.directory(new File(System.getProperty("user.dir")));
+        LOGGER.info("Working directory: " + builder.directory().getAbsolutePath());
+        LOGGER.info("Executing command: docker-compose down --volumes --remove-orphans");
 
+        try {
+           Process process = builder.start();
+           int exitCode = process.waitFor();
+           if (exitCode == 0) {
+               LOGGER.info("Docker compose shutdown completed successfully.");
+           } else {
+               LOGGER.warning("Docker compose shutdown exited with code: " + exitCode);
+           }
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error stopping docker containers", e);
             throw e;
