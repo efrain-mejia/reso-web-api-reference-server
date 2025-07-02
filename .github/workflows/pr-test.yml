@@ -137,8 +137,6 @@ jobs:
       run: |
         chmod +x gradlew
         sudo rm -rf .gradle
-        # Don't remove build directory - it contains our artifacts!
-        # sudo rm -rf build
         sudo chown -R $USER:$USER . || true
         
     - name: Verify environment setup
@@ -160,7 +158,7 @@ jobs:
         sed -i 's/LOOKUP_TYPE=.*/LOOKUP_TYPE=STRING/' .env
         echo "Updated LOOKUP_TYPE to STRING"
         
-        if LOOKUP_TYPE=STRING ./gradlew test --tests org.reso.tests.LookupStringTest --rerun-tasks --info; then
+        if LOOKUP_TYPE=STRING ./gradlew test --tests org.reso.tests.LookupStringTest --info; then
           echo "✅ LookupStringTest PASSED at $(date)"
         else
           echo "❌ LookupStringTest FAILED at $(date)"
@@ -173,7 +171,7 @@ jobs:
         sed -i 's/LOOKUP_TYPE=.*/LOOKUP_TYPE=ENUM_FLAGS/' .env
         echo "Updated LOOKUP_TYPE to ENUM_FLAGS"
         
-        if LOOKUP_TYPE=ENUM_FLAGS ./gradlew test --tests org.reso.tests.LookupEnumFlagsTest --rerun-tasks --info; then
+        if LOOKUP_TYPE=ENUM_FLAGS ./gradlew test --tests org.reso.tests.LookupEnumFlagsTest --info; then
           echo "✅ LookupEnumFlagsTest PASSED at $(date)"
         else
           echo "❌ LookupEnumFlagsTest FAILED at $(date)"
@@ -186,7 +184,7 @@ jobs:
         sed -i 's/LOOKUP_TYPE=.*/LOOKUP_TYPE=ENUM_COLLECTION/' .env
         echo "Updated LOOKUP_TYPE to ENUM_COLLECTION"
         
-        if LOOKUP_TYPE=ENUM_COLLECTION ./gradlew test --tests org.reso.tests.LookupEnumTest --rerun-tasks --info; then
+        if LOOKUP_TYPE=ENUM_COLLECTION ./gradlew test --tests org.reso.tests.LookupEnumTest --info; then
           echo "✅ LookupEnumTest PASSED at $(date)"
         else
           echo "❌ LookupEnumTest FAILED at $(date)"
