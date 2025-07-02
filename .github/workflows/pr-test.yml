@@ -76,7 +76,7 @@ jobs:
     - name: Run tests
       run: |
         echo "######################################################"
-        echo Starting all lookup tests..."
+        echo "Starting all lookup tests..."
         echo "######################################################"
         
         echo "=== LookupStringTest ==="
