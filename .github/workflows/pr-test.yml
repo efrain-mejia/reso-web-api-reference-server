@@ -137,7 +137,8 @@ jobs:
       run: |
         chmod +x gradlew
         sudo rm -rf .gradle
-        sudo rm -rf build
+        # Don't remove build directory - it contains our artifacts!
+        # sudo rm -rf build
         sudo chown -R $USER:$USER . || true
         
     - name: Verify environment setup
