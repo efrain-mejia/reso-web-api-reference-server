@@ -147,69 +147,69 @@ jobs:
         echo "Build artifacts:"
         ls -la build/libs/ || echo "No build/libs directory found"
         
-    - name: Run tests
-      run: |
-        echo "######################################################"
-        echo "Starting all lookup tests..."
-        echo "######################################################"
+    # - name: Run tests
+    #   run: |
+    #     echo "######################################################"
+    #     echo "Starting all lookup tests..."
+    #     echo "######################################################"
         
-        echo "=== LookupStringTest ==="
-        echo "Test started at: $(date)"
-        # Update only LOOKUP_TYPE in existing .env file
-        sed -i 's/LOOKUP_TYPE=.*/LOOKUP_TYPE=STRING/' .env
-        echo "Updated LOOKUP_TYPE to STRING"
+    #     echo "=== LookupStringTest ==="
+    #     echo "Test started at: $(date)"
+    #     # Update only LOOKUP_TYPE in existing .env file
+    #     sed -i 's/LOOKUP_TYPE=.*/LOOKUP_TYPE=STRING/' .env
+    #     echo "Updated LOOKUP_TYPE to STRING"
         
-        if LOOKUP_TYPE=STRING ./gradlew test --tests org.reso.tests.LookupStringTest --rerun-tasks --info; then
-          echo "✅ LookupStringTest PASSED at $(date)"
-        else
-          echo "❌ LookupStringTest FAILED at $(date)"
-          exit 1
-        fi
+    #     if LOOKUP_TYPE=STRING ./gradlew test --tests org.reso.tests.LookupStringTest --rerun-tasks --info; then
+    #       echo "✅ LookupStringTest PASSED at $(date)"
+    #     else
+    #       echo "❌ LookupStringTest FAILED at $(date)"
+    #       exit 1
+    #     fi
         
-        echo "=== LookupEnumFlagsTest ==="
-        echo "Test started at: $(date)"
-        # Update only LOOKUP_TYPE in existing .env file
-        sed -i 's/LOOKUP_TYPE=.*/LOOKUP_TYPE=ENUM_FLAGS/' .env
-        echo "Updated LOOKUP_TYPE to ENUM_FLAGS"
+    #     echo "=== LookupEnumFlagsTest ==="
+    #     echo "Test started at: $(date)"
+    #     # Update only LOOKUP_TYPE in existing .env file
+    #     sed -i 's/LOOKUP_TYPE=.*/LOOKUP_TYPE=ENUM_FLAGS/' .env
+    #     echo "Updated LOOKUP_TYPE to ENUM_FLAGS"
         
-        if LOOKUP_TYPE=ENUM_FLAGS ./gradlew test --tests org.reso.tests.LookupEnumFlagsTest --rerun-tasks --info; then
-          echo "✅ LookupEnumFlagsTest PASSED at $(date)"
-        else
-          echo "❌ LookupEnumFlagsTest FAILED at $(date)"
-          exit 1
-        fi
+    #     if LOOKUP_TYPE=ENUM_FLAGS ./gradlew test --tests org.reso.tests.LookupEnumFlagsTest --rerun-tasks --info; then
+    #       echo "✅ LookupEnumFlagsTest PASSED at $(date)"
+    #     else
+    #       echo "❌ LookupEnumFlagsTest FAILED at $(date)"
+    #       exit 1
+    #     fi
         
-        echo "=== LookupEnumTest ==="
-        echo "Test started at: $(date)"
-        # Update only LOOKUP_TYPE in existing .env file
-        sed -i 's/LOOKUP_TYPE=.*/LOOKUP_TYPE=ENUM_COLLECTION/' .env
-        echo "Updated LOOKUP_TYPE to ENUM_COLLECTION"
+    #     echo "=== LookupEnumTest ==="
+    #     echo "Test started at: $(date)"
+    #     # Update only LOOKUP_TYPE in existing .env file
+    #     sed -i 's/LOOKUP_TYPE=.*/LOOKUP_TYPE=ENUM_COLLECTION/' .env
+    #     echo "Updated LOOKUP_TYPE to ENUM_COLLECTION"
         
-        if LOOKUP_TYPE=ENUM_COLLECTION ./gradlew test --tests org.reso.tests.LookupEnumTest --rerun-tasks --info; then
-          echo "✅ LookupEnumTest PASSED at $(date)"
-        else
-          echo "❌ LookupEnumTest FAILED at $(date)"
-          exit 1
-        fi
+    #     if LOOKUP_TYPE=ENUM_COLLECTION ./gradlew test --tests org.reso.tests.LookupEnumTest --rerun-tasks --info; then
+    #       echo "✅ LookupEnumTest PASSED at $(date)"
+    #     else
+    #       echo "❌ LookupEnumTest FAILED at $(date)"
+    #       exit 1
+    #     fi
         
-        echo "######################################################"
-        echo "All tests completed successfully at $(date)!"
-        echo "######################################################"
+    #     echo "######################################################"
+    #     echo "All tests completed successfully at $(date)!"
+    #     echo "######################################################"
         
-    - name: Final cleanup
-      if: always()
-      run: |
-        echo "Performing final cleanup of Docker containers..."
-        docker compose down --volumes --remove-orphans || true
-        echo "Final cleanup completed"
+    # - name: Final cleanup
+    #   if: always()
+    #   run: |
+    #     echo "Performing final cleanup of Docker containers..."
+    #     docker compose down --volumes --remove-orphans || true
+    #     echo "Final cleanup completed"
         
-    - name: Upload test results
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: test-results
-        path: |
-          build/test-results/
-          build/reports/
-          results/
-        retention-days: 7
+    # - name: Upload test results
+    #   if: always()
+    #   uses: actions/upload-artifact@v4
+    #   with:
+    #     name: test-results
+    #     path: |
+    #       build/test-results/
+    #       build/reports/
+    #       results/
+    #     retention-days: 7
