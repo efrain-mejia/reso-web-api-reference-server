@@ -146,12 +146,8 @@ jobs:
         echo "Build artifacts:"
         ls -la build/libs/ || echo "No build/libs directory found"
         
-    - name: Run tests
+    - name: Run LookupStringTest
       run: |
-        echo "######################################################"
-        echo "Starting all lookup tests..."
-        echo "######################################################"
-        
         echo "=== LookupStringTest ==="
         echo "Test started at: $(date)"
         # Update only LOOKUP_TYPE in existing .env file
@@ -164,7 +160,9 @@ jobs:
           echo "❌ LookupStringTest FAILED at $(date)"
           exit 1
         fi
-        
+    
+    - name: Run LookupEnumFlagsTest
+      run: |
         echo "=== LookupEnumFlagsTest ==="
         echo "Test started at: $(date)"
         # Update only LOOKUP_TYPE in existing .env file
@@ -178,6 +176,8 @@ jobs:
           exit 1
         fi
         
+    - name: Run LookupEnumTest
+      run: |    
         echo "=== LookupEnumTest ==="
         echo "Test started at: $(date)"
         # Update only LOOKUP_TYPE in existing .env file
@@ -190,10 +190,6 @@ jobs:
           echo "❌ LookupEnumTest FAILED at $(date)"
           exit 1
         fi
-        
-        echo "######################################################"
-        echo "All tests completed successfully at $(date)!"
-        echo "######################################################"
         
     - name: Final cleanup
       if: always()
