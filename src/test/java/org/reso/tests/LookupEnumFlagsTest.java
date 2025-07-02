@@ -19,7 +19,7 @@ public class LookupEnumFlagsTest {
         System.out.println("Starting RESO Reference Server for Enum...");
 
         try {
-            ProcessBuilder builder = new ProcessBuilder("docker", "compose", "-f", "docker-compose.yml", "-f", "docker-compose.test.yml", "up", "-d");
+            ProcessBuilder builder = new ProcessBuilder("docker", "compose", "up", "-d");
             builder.directory(new File(System.getProperty("user.dir")));
             LOGGER.info("Working directory: " + System.getProperty("user.dir"));
             LOGGER.info("Executing command: docker compose up -d");
@@ -61,8 +61,6 @@ public class LookupEnumFlagsTest {
 
         ProcessBuilder builder = new ProcessBuilder(
           "docker", "compose",
-          "-f", "docker-compose.yml",
-          "-f", "docker-compose.test.yml",
           "down",            // tear down containers
           "--volumes",       // remove named & anonymous volumes
           "--remove-orphans" // clean up any stray related containers
