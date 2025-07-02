@@ -90,8 +90,48 @@ jobs:
       
     - name: Build the project
       run: |
-        echo "Building the project..."
-        docker compose -f docker-compose.builder.yml --project-name builder-stack up --build
+        echo "######################################################"
+        echo "Starting project build with docker-compose..."
+        echo "######################################################"
+        echo "Build started at: $(date)"
+        echo "Working directory: $(pwd)"
+        echo "Docker version: $(docker --version)"
+        echo "Docker compose version: $(docker compose version)"
+        
+        # Start the build and capture both stdout and stderr
+        echo "Executing: docker compose -f docker-compose.builder.yml --project-name builder-stack up --build"
+        
+        if docker compose -f docker-compose.builder.yml --project-name builder-stack up --build; then
+          echo "✅ BUILD SUCCESS: Docker compose build completed successfully"
+          echo "Build completed at: $(date)"
+          
+          # Show what was built
+          echo "Checking build artifacts..."
+          ls -la build/libs/ 2>/dev/null || echo "No build/libs directory found yet"
+          
+          # Show running containers
+          echo "Running containers:"
+          docker ps
+          
+          # Show container logs
+          echo "Container logs:"
+          docker compose -f docker-compose.builder.yml --project-name builder-stack logs
+          
+        else
+          echo "❌ BUILD FAILED: Docker compose build failed"
+          echo "Build failed at: $(date)"
+          echo "Exit code: $?"
+          
+          # Show container logs for debugging
+          echo "Container logs for debugging:"
+          docker compose -f docker-compose.builder.yml --project-name builder-stack logs || true
+          
+          # Show docker status
+          echo "Docker status:"
+          docker ps -a
+          
+          exit 1
+        fi
 
     - name: Grant execute permission for gradlew and fix permissions
       run: |
@@ -114,21 +154,47 @@ jobs:
         echo "######################################################"
         
         echo "=== LookupStringTest ==="
+        echo "Test started at: $(date)"
         # Update only LOOKUP_TYPE in existing .env file
         sed -i 's/LOOKUP_TYPE=.*/LOOKUP_TYPE=STRING/' .env
-        LOOKUP_TYPE=STRING ./gradlew test --tests org.reso.tests.LookupStringTest --rerun-tasks --info
+        echo "Updated LOOKUP_TYPE to STRING"
+        
+        if LOOKUP_TYPE=STRING ./gradlew test --tests org.reso.tests.LookupStringTest --rerun-tasks --info; then
+          echo "✅ LookupStringTest PASSED at $(date)"
+        else
+          echo "❌ LookupStringTest FAILED at $(date)"
+          exit 1
+        fi
         
         echo "=== LookupEnumFlagsTest ==="
+        echo "Test started at: $(date)"
         # Update only LOOKUP_TYPE in existing .env file
         sed -i 's/LOOKUP_TYPE=.*/LOOKUP_TYPE=ENUM_FLAGS/' .env
-        LOOKUP_TYPE=ENUM_FLAGS ./gradlew test --tests org.reso.tests.LookupEnumFlagsTest --rerun-tasks --info
+        echo "Updated LOOKUP_TYPE to ENUM_FLAGS"
+        
+        if LOOKUP_TYPE=ENUM_FLAGS ./gradlew test --tests org.reso.tests.LookupEnumFlagsTest --rerun-tasks --info; then
+          echo "✅ LookupEnumFlagsTest PASSED at $(date)"
+        else
+          echo "❌ LookupEnumFlagsTest FAILED at $(date)"
+          exit 1
+        fi
         
         echo "=== LookupEnumTest ==="
+        echo "Test started at: $(date)"
         # Update only LOOKUP_TYPE in existing .env file
         sed -i 's/LOOKUP_TYPE=.*/LOOKUP_TYPE=ENUM_COLLECTION/' .env
-        LOOKUP_TYPE=ENUM_COLLECTION ./gradlew test --tests org.reso.tests.LookupEnumTest --rerun-tasks --info
+        echo "Updated LOOKUP_TYPE to ENUM_COLLECTION"
         
-        echo "All tests completed successfully!"
+        if LOOKUP_TYPE=ENUM_COLLECTION ./gradlew test --tests org.reso.tests.LookupEnumTest --rerun-tasks --info; then
+          echo "✅ LookupEnumTest PASSED at $(date)"
+        else
+          echo "❌ LookupEnumTest FAILED at $(date)"
+          exit 1
+        fi
+        
+        echo "######################################################"
+        echo "All tests completed successfully at $(date)!"
+        echo "######################################################"
         
     - name: Final cleanup
       if: always()
