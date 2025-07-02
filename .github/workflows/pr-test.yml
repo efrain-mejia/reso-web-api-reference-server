@@ -61,6 +61,26 @@ jobs:
       run: |
         echo "Creating base .env file..."
         cat > .env << 'EOF'
+        # Database Configuration
+        DB_TYPE=mongodb
+        MONGO_SYNC_CONNECTION_STR=mongodb://mongo-db:27017
+        MONGO_DATABASE=reso_reference_db
+        MYSQL_HOST=mysql-db
+        MYSQL_DATABASE=reso_reference_db
+        MYSQL_USER=root
+        MYSQL_PASSWORD=password
+        MYSQL_ROOT_PASSWORD=password
+        MYSQL_ROOT_HOST=%
+        MYSQL_URL=jdbc:mysql://mysql-db:3306/reso_reference_db
+        
+        # Lookup Configuration
+        LOOKUP_TYPE=STRING
+        
+        # Other Configuration
+        CERT_REPORT_FILENAME=RESODataDictionary-2.0.metadata-report.json
+        ATLAS_DATAFILL_URI=
+        
+        # JWT Secret
         JWT_SECRET=${{ secrets.JWT_SECRET }}
         EOF
         
@@ -80,6 +100,13 @@ jobs:
         sudo rm -rf build
         sudo chown -R $USER:$USER . || true
         
+    - name: Verify environment setup
+      run: |
+        echo "Verifying .env file contents:"
+        cat .env
+        echo "Build artifacts:"
+        ls -la build/libs/ || echo "No build/libs directory found"
+        
     - name: Run tests
       run: |
         echo "######################################################"
@@ -87,21 +114,18 @@ jobs:
         echo "######################################################"
         
         echo "=== LookupStringTest ==="
-        cat > .env << 'EOF'
-        LOOKUP_TYPE=STRING
-        EOF
+        # Update only LOOKUP_TYPE in existing .env file
+        sed -i 's/LOOKUP_TYPE=.*/LOOKUP_TYPE=STRING/' .env
         LOOKUP_TYPE=STRING ./gradlew test --tests org.reso.tests.LookupStringTest --rerun-tasks --info
         
-        echo "=== LookupEnumFlagsTest with ${{ matrix.user_config.config_name }} ==="
-        cat > .env << 'EOF'
-        LOOKUP_TYPE=ENUM_FLAGS
-        EOF
+        echo "=== LookupEnumFlagsTest ==="
+        # Update only LOOKUP_TYPE in existing .env file
+        sed -i 's/LOOKUP_TYPE=.*/LOOKUP_TYPE=ENUM_FLAGS/' .env
         LOOKUP_TYPE=ENUM_FLAGS ./gradlew test --tests org.reso.tests.LookupEnumFlagsTest --rerun-tasks --info
         
         echo "=== LookupEnumTest ==="
-        cat > env.test << 'EOF'
-        LOOKUP_TYPE=ENUM_COLLECTION
-        EOF
+        # Update only LOOKUP_TYPE in existing .env file
+        sed -i 's/LOOKUP_TYPE=.*/LOOKUP_TYPE=ENUM_COLLECTION/' .env
         LOOKUP_TYPE=ENUM_COLLECTION ./gradlew test --tests org.reso.tests.LookupEnumTest --rerun-tasks --info
         
         echo "All tests completed successfully!"
