@@ -63,22 +63,19 @@ jobs:
         cat > .env << 'EOF'
         # Database Configuration
         DB_TYPE=mongodb
-        MONGO_SYNC_CONNECTION_STR=mongodb://mongo-db:27017
+        # MONGO_SYNC_CONNECTION_STR=mongodb://mongo-db:27017/reso
         MONGO_DATABASE=reso
         MYSQL_HOST=mysql-db
-        MYSQL_DATABASE=reso_reference_db
+        MYSQL_DATABASE=reso
         MYSQL_USER=root
-        MYSQL_PASSWORD=password
-        MYSQL_ROOT_PASSWORD=password
-        MYSQL_ROOT_HOST=%
-        MYSQL_URL=jdbc:mysql://mysql-db:3306/reso_reference_db
+        MYSQL_PASSWORD=root
+        MYSQL_URL=jdbc:mysql://${MYSQL_HOST}:3306/${MYSQL_DATABASE}?autoReconnect=true&maxReconnects=4
         
         # Lookup Configuration
         LOOKUP_TYPE=STRING
         
         # Other Configuration
         CERT_REPORT_FILENAME=RESODataDictionary-2.0.metadata-report.json
-        ATLAS_DATAFILL_URI=
         
         # JWT Secret
         JWT_SECRET=${{ secrets.JWT_SECRET }}
