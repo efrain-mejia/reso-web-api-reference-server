@@ -233,8 +233,8 @@ jobs:
           docker compose logs mongo-db || echo "No mongo-db container found"
           
           echo "--- App container logs (last 50 lines) ---"
-          docker compose logs --tail=50 odata-manager-app || \
-          docker compose logs --tail=50 app || \
+          docker compose logs --tail=300 odata-manager-app || \
+          docker compose logs --tail=300 app || \
           echo "Failed to get app container logs"
           
           echo "--- Network connectivity test ---"
