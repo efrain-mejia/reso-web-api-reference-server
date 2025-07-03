@@ -64,7 +64,7 @@ jobs:
         # Database Configuration
         DB_TYPE=mongodb
         MONGO_SYNC_CONNECTION_STR=mongodb://mongo-db:27017
-        MONGO_DATABASE=reso_reference_db
+        MONGO_DATABASE=reso
         MYSQL_HOST=mysql-db
         MYSQL_DATABASE=reso_reference_db
         MYSQL_USER=root

@@ -21911,7 +21911,7 @@
     },
     {
       "resourceName": "LockOrBox",
-      "fieldName": "LockOrBoxOriginatingSystemID",
+      "fieldName": "LockOrBoxOriginatingSystemId",
       "type": "Edm.String",
       "nullable": true,
       "maxLength": 25,
@@ -21922,7 +21922,7 @@
         },
         {
           "term": "RESO.DDWikiUrl",
-          "value": "https://ddwiki.reso.org/display/DDW20/LockOrBoxOriginatingSystemID+Field"
+          "value": "https://ddwiki.reso.org/display/DDW20/LockOrBoxOriginatingSystemId+Field"
         },
         {
           "term": "Core.Description",
@@ -21974,7 +21974,7 @@
     },
     {
       "resourceName": "LockOrBox",
-      "fieldName": "LockOrBoxSourceSystemID",
+      "fieldName": "LockOrBoxSourceSystemId",
       "type": "Edm.String",
       "nullable": true,
       "maxLength": 25,
@@ -21985,7 +21985,7 @@
         },
         {
           "term": "RESO.DDWikiUrl",
-          "value": "https://ddwiki.reso.org/display/DDW20/LockOrBoxSourceSystemID+Field"
+          "value": "https://ddwiki.reso.org/display/DDW20/LockOrBoxSourceSystemId+Field"
         },
         {
           "term": "Core.Description",
@@ -23078,7 +23078,7 @@
     },
     {
       "resourceName": "Media",
-      "fieldName": "OriginatingSystemResourceRecordID",
+      "fieldName": "OriginatingSystemResourceRecordId",
       "type": "Edm.String",
       "nullable": true,
       "maxLength": 255,
@@ -23089,7 +23089,7 @@
         },
         {
           "term": "RESO.DDWikiUrl",
-          "value": "https://ddwiki.reso.org/display/DDW20/OriginatingSystemResourceRecordID+Field"
+          "value": "https://ddwiki.reso.org/display/DDW20/OriginatingSystemResourceRecordId+Field"
         },
         {
           "term": "Core.Description",
@@ -23120,7 +23120,7 @@
     },
     {
       "resourceName": "Media",
-      "fieldName": "OriginatingSystemResourceRecordSystemID",
+      "fieldName": "OriginatingSystemResourceRecordSystemId",
       "type": "Edm.String",
       "nullable": true,
       "maxLength": 25,
@@ -23131,11 +23131,11 @@
         },
         {
           "term": "RESO.DDWikiUrl",
-          "value": "https://ddwiki.reso.org/display/DDW20/OriginatingSystemResourceRecordSystemID+Field"
+          "value": "https://ddwiki.reso.org/display/DDW20/OriginatingSystemResourceRecordSystemId+Field"
         },
         {
           "term": "Core.Description",
-          "value": "The system ID of the resource record from the originating system is used when the resource record is originated from a different system than the media. This is the system ID of the OriginatingSystemResourceRecordID and/or the OriginatingSystemResourceRecordKey when they are from a different system than the OriginatingSystemID and/or OriginatingSystemName."
+          "value": "The system ID of the resource record from the originating system is used when the resource record is originated from a different system than the media. This is the system ID of the OriginatingSystemResourceRecordId and/or the OriginatingSystemResourceRecordKey when they are from a different system than the OriginatingSystemID and/or OriginatingSystemName."
         }
       ]
     },
@@ -23396,7 +23396,7 @@
     },
     {
       "resourceName": "Media",
-      "fieldName": "SourceSystemResourceRecordSystemID",
+      "fieldName": "SourceSystemResourceRecordSystemId",
       "type": "Edm.String",
       "nullable": true,
       "maxLength": 25,
@@ -23407,7 +23407,7 @@
         },
         {
           "term": "RESO.DDWikiUrl",
-          "value": "https://ddwiki.reso.org/display/DDW20/SourceSystemResourceRecordSystemID+Field"
+          "value": "https://ddwiki.reso.org/display/DDW20/SourceSystemResourceRecordSystemId+Field"
         },
         {
           "term": "Core.Description",
@@ -26325,7 +26325,7 @@
     },
     {
       "resourceName": "Office",
-      "fieldName": "FranchiseNationalAssociationID",
+      "fieldName": "FranchiseNationalAssociationId",
       "type": "Edm.String",
       "nullable": true,
       "maxLength": 25,
@@ -26336,7 +26336,7 @@
         },
         {
           "term": "RESO.DDWikiUrl",
-          "value": "https://ddwiki.reso.org/display/DDW20/FranchiseNationalAssociationID+Field"
+          "value": "https://ddwiki.reso.org/display/DDW20/FranchiseNationalAssociationId+Field"
         },
         {
           "term": "Core.Description",
@@ -26728,7 +26728,7 @@
     },
     {
       "resourceName": "Office",
-      "fieldName": "OfficeBrokerNationalAssociationID",
+      "fieldName": "OfficeBrokerNationalAssociationId",
       "type": "Edm.String",
       "nullable": true,
       "maxLength": 25,
@@ -26739,7 +26739,7 @@
         },
         {
           "term": "RESO.DDWikiUrl",
-          "value": "https://ddwiki.reso.org/display/DDW20/OfficeBrokerNationalAssociationID+Field"
+          "value": "https://ddwiki.reso.org/display/DDW20/OfficeBrokerNationalAssociationId+Field"
         },
         {
           "term": "Core.Description",
