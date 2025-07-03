@@ -8,7 +8,8 @@ plugins {
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(8)
+        languageVersion = JavaLanguageVersion.of(17)
+        vendor = JvmVendorSpec.ADOPTIUM
     }
 }
 
@@ -18,38 +19,139 @@ repositories {
 }
 
 dependencies {
-    // API dependencies (exposed to consumers of this library)
-    api libs.org.postgresql.postgresql
-    api libs.org.apache.olingo.odata.server.api
-    api libs.com.fasterxml.jackson.core.jackson.databind
-    api libs.org.apache.olingo.odata.commons.api
-    api libs.org.apache.olingo.odata.commons.core
-    api libs.org.slf4j.slf4j.api
-    api libs.com.fasterxml.jackson.core.jackson.annotations
-    api libs.com.google.code.gson.gson
-    api libs.org.mongodb.mongodb.jdbc
+    // Core dependencies
+    api 'org.apache.olingo:odata-server-api:4.9.0'
+    api 'org.apache.olingo:odata-commons-api:4.9.0'
+    api 'org.apache.olingo:odata-commons-core:4.9.0'
+    api 'com.fasterxml.jackson.core:jackson-databind:2.13.0'
+    api 'com.fasterxml.jackson.core:jackson-annotations:2.13.0'
+    api 'com.google.code.gson:gson:2.8.9'
+    api 'org.slf4j:slf4j-api:2.0.17'
+    api 'com.google.code.findbugs:jsr305:3.0.2' 
+    // MongoDB dependencies
+    api 'org.mongodb:mongodb-driver-sync:5.4.0'
+    api 'org.mongodb:bson:5.4.0'
 
+    // MySQL dependencies
+    implementation 'mysql:mysql-connector-java:8.0.27'
 
-    // Runtime-only dependencies
-    runtimeOnly libs.mysql.mysql.connector.java
-    runtimeOnly libs.org.apache.olingo.odata.server.core
-    runtimeOnly libs.org.slf4j.slf4j.simple
+    // Runtime dependencies
+    runtimeOnly 'org.apache.olingo:odata-server-core:4.9.0'
+    runtimeOnly 'org.slf4j:slf4j-simple:2.0.17'
 
     // Test dependencies
-    testImplementation libs.org.junit.jupiter.junit.jupiter.api
-    testImplementation libs.org.junit.jupiter.junit.jupiter.engine
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
+    implementation 'org.apache.httpcomponents:httpclient:4.5.13'
 
-    // Compile-only dependencies
-    compileOnly libs.javax.servlet.javax.servlet.api
+    // Provided dependencies
+    compileOnly 'javax.servlet:javax.servlet-api:4.0.1'
 }
 
 group = 'org.reso'
-version = '1.0'
-description = 'RESOservice'
+version = '2.0'
+description = 'WebApiReferenceServer'
 
-// Ensure compatibility with Java 8
+def CERT_REPORT_FILENAME = System.getenv("CERT_REPORT_FILENAME") ?: "RESODataDictionary-2.0.metadata-report.json"
+def tempDirFile = new File(project.projectDir, "temp")
+def sqlDirFile = new File(project.projectDir, "sql")
+def webApiCommanderJarFile = new File(project.projectDir, "temp/web-api-commander.jar")
+def jsonMetadataFile = new File(project.projectDir, "certification-reports/$CERT_REPORT_FILENAME")
+
+war {
+    // Override the default naming 
+    archiveFileName = 'core.war'
+}
+
+task prepareDirs {
+    group = "setup"
+    description = "Creates necessary directories (temp, sql) in the project"
+    doLast {
+        tempDirFile.mkdirs()
+        sqlDirFile.mkdirs()
+        println "Created 'temp' and 'sql' directories (if they did not exist already)."
+    }
+}
+
+task downloadWebApiCommanderJar {
+    group = "download"
+    description = "Downloads web-api-commander.jar for standalone mode if not present."
+    
+    // Only download if SQL_HOST is not set AND if the file is missing.
+    onlyIf {
+        return (System.getenv("SQL_HOST") == null || System.getenv("SQL_HOST").trim().isEmpty()) && !webApiCommanderJarFile.exists()
+    }
+    
+    doLast {
+        println "Downloading web-api-commander.jar..."
+        def url = 'https://resostuff.blob.core.windows.net/refserverfiles/web-api-commander.jar'
+        def dest = webApiCommanderJarFile
+        
+        // Create parent directories if they don't exist
+        dest.parentFile.mkdirs()
+        
+        new URL(url).withInputStream { inputStream ->
+            dest.withOutputStream { outputStream ->
+                outputStream << inputStream
+            }
+        }
+        println "Downloaded web-api-commander.jar successfully"
+    }
+}
+
+task copyMetadata(type: Copy) {
+    from("$projectDir/certification-reports/$CERT_REPORT_FILENAME")
+    into("$buildDir/libs")
+    doFirst {
+        if (!jsonMetadataFile.exists()) {
+            throw new GradleException("Metadata JSON not found at: ${jsonMetadataFile}")
+        } 
+    }
+}
+
+task packageCore {
+    group = "build"
+    description = "Prepares environment, downloads dependencies, builds WAR, and copies metadata."
+    dependsOn prepareDirs, war, downloadWebApiCommanderJar, copyMetadata
+    doLast {
+        println "PackageCore complete. Check build/libs for core.war and metadata JSON."
+    }
+}
+
+test {
+    useJUnitPlatform()
+    environment "LOOKUP_TYPE", "STRING"
+    environment "DB_TYPE", "mongodb"
+    
+    // Fix Java 17 module system issues for reflection in tests
+    jvmArgs = [
+        '--add-opens=java.base/java.util=ALL-UNNAMED',
+        '--add-opens=java.base/java.lang=ALL-UNNAMED'
+    ]
+}
+
+tasks.test {
+    useJUnitPlatform()
+    // Exclude ExpandUtilsTest to run it only when needed
+    exclude '**/ExpandUtilsTest.class'
+}
+
+task runExpandUtilsTest(type: Test) {
+    useJUnitPlatform()
+    // Run only ExpandUtilsTest
+    include '**/ExpandUtilsTest.class'
+    
+    // Fix Java 17 module system issues for reflection in tests
+    jvmArgs = [
+        '--add-opens=java.base/java.util=ALL-UNNAMED',
+        '--add-opens=java.base/java.lang=ALL-UNNAMED'
+    ]
+}
+
+// Ensure compatibility with Java 17
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
