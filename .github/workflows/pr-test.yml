@@ -83,6 +83,11 @@ jobs:
         
         # Other Configuration
         CERT_REPORT_FILENAME=RESODataDictionary-2.0.metadata-report.json
+        MYSQL_HOST=mysql-db
+        MYSQL_DATABASE=reso
+        MYSQL_USER=root
+        MYSQL_PASSWORD=root
+        MYSQL_URL=jdbc:mysql://${MYSQL_HOST}:3306/${MYSQL_DATABASE}?autoReconnect=true&maxReconnects=4
         
         # Web API Commander Path
         WEB_API_COMMANDER_PATH=$GITHUB_WORKSPACE/../web-api-commander
