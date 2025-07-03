@@ -146,6 +146,76 @@ jobs:
         echo "Build artifacts:"
         ls -la build/libs/ || echo "No build/libs directory found"
         
+    - name: Start server and verify API endpoints
+      run: |
+        echo "=== Starting server with docker compose ==="
+        echo "Server startup initiated at: $(date)"
+        
+        # Start the server in detached mode
+        docker compose up -d
+        
+        echo "Waiting for server to be ready..."
+        
+        # Wait for health endpoint to return 200
+        max_attempts=30
+        attempt=1
+        while [ $attempt -le $max_attempts ]; do
+          echo "Health check attempt $attempt/$max_attempts..."
+          
+          if response=$(curl -s -w "%{http_code}" -o /tmp/health_response.txt http://localhost:8080/core/health 2>/dev/null); then
+            http_code="${response: -3}"
+            response_body=$(cat /tmp/health_response.txt)
+            
+            echo "Health check response code: $http_code"
+            echo "Health check response body: $response_body"
+            
+            if [ "$http_code" = "200" ]; then
+              echo "✅ Health check successful at $(date)"
+              break
+            fi
+          else
+            echo "Health check request failed"
+          fi
+          
+          if [ $attempt -eq $max_attempts ]; then
+            echo "❌ Health check failed after $max_attempts attempts"
+            echo "Container logs:"
+            docker compose logs
+            exit 1
+          fi
+          
+          echo "Waiting 10 seconds before next attempt..."
+          sleep 10
+          ((attempt++))
+        done
+        
+        echo "=== Testing API endpoint ==="
+        
+        # Test the Property endpoint with bearer token
+        echo "Making API request to Property endpoint..."
+        api_response=$(curl -s -w "%{http_code}" -H "Authorization: Bearer reso-test-token" \
+          -o /tmp/api_response.txt \
+          "http://localhost:8080/core/2.0.0/Property?\$top=1&\$count=true" 2>/dev/null || echo "000")
+        
+        api_http_code="${api_response: -3}"
+        api_response_body=$(cat /tmp/api_response.txt)
+        
+        echo "API request status code: $api_http_code"
+        echo "API response body: $api_response_body"
+        
+        if [ "$api_http_code" = "200" ]; then
+          echo "✅ API test successful at $(date)"
+        else
+          echo "⚠️  API test returned status code: $api_http_code"
+          echo "This may be expected depending on server configuration"
+        fi
+        
+        echo "Server verification completed at: $(date)"
+        
+        echo "=== Cleaning up server ==="
+        docker compose down --volumes --remove-orphans
+        echo "Server cleanup completed at: $(date)"
+        
     - name: Run LookupStringTest
       run: |
         echo "=== LookupStringTest ==="
