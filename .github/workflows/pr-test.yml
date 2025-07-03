@@ -63,7 +63,7 @@ jobs:
         cat > .env << 'EOF'
         # Database Configuration
         DB_TYPE=mongodb
-        # MONGO_SYNC_CONNECTION_STR=mongodb://mongo-db:27017/reso
+        MONGO_SYNC_CONNECTION_STR=mongodb://mongo-db:27017/reso
         MONGO_DATABASE=reso
         MYSQL_HOST=mysql-db
         MYSQL_DATABASE=reso
@@ -232,10 +232,26 @@ jobs:
           echo "--- MongoDB container logs ---"
           docker compose logs mongo-db || echo "No mongo-db container found"
           
-          echo "--- App container logs (last 50 lines) ---"
+          echo "--- App container logs (last 300 lines) ---"
           docker compose logs --tail=300 odata-manager-app || \
           docker compose logs --tail=300 app || \
           echo "Failed to get app container logs"
+          
+          echo "--- Java system properties and environment inside container ---"
+          docker compose exec -T odata-manager-app java -XshowSettings:properties -version 2>/dev/null || \
+          docker compose exec -T app java -XshowSettings:properties -version 2>/dev/null || \
+          echo "Failed to get Java system properties"
+          
+          echo "--- MongoDB connection debugging ---"
+          echo "Checking if MongoDB host is resolvable from app container:"
+          docker compose exec -T odata-manager-app nslookup mongo-db 2>/dev/null || \
+          docker compose exec -T app nslookup mongo-db 2>/dev/null || \
+          echo "DNS lookup failed"
+          
+          echo "Testing direct MongoDB connection from app container:"
+          docker compose exec -T odata-manager-app nc -zv mongo-db 27017 2>/dev/null || \
+          docker compose exec -T app nc -zv mongo-db 27017 2>/dev/null || \
+          echo "Direct connection test failed"
           
           echo "--- Network connectivity test ---"
           echo "Testing connectivity from app to mongo-db..."
@@ -246,11 +262,6 @@ jobs:
           echo "--- MongoDB connection test ---"
           echo "Testing MongoDB connection directly..."
           docker compose exec -T mongo-db mongosh --eval "db.adminCommand('ping')" || echo "MongoDB connection test failed"
-          
-          echo "--- Checking if MongoDB is accepting connections ---"
-          docker compose exec -T odata-manager-app nc -zv mongo-db 27017 2>/dev/null || \
-          docker compose exec -T app nc -zv mongo-db 27017 2>/dev/null || \
-          echo "Port 27017 not reachable from app container"
           
           echo "=== END DEBUG INFORMATION ==="
         fi
