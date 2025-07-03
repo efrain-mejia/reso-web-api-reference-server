@@ -42,7 +42,9 @@ jobs:
         
     - name: Create refServLocal.json configuration
       run: |
-        echo "Creating refServLocal.json for ${{ matrix.user_config.config_name }}..."
+        echo "Creating refServLocal.json configuration..."
+        
+        # Create the config content
         cat > refServLocal.json << EOF
         {
             "providerUoi": "providerUoi",
@@ -57,6 +59,16 @@ jobs:
         }
         EOF
         
+        # Copy to web-api-commander directory where reso-certification-utils expects it
+        echo "Copying refServLocal.json to web-api-commander directory..."
+        cp refServLocal.json ../web-api-commander/refServLocal.json
+        
+        echo "Verifying refServLocal.json locations:"
+        echo "✅ Current directory:"
+        ls -la refServLocal.json
+        echo "✅ Web-api-commander directory:"
+        ls -la ../web-api-commander/refServLocal.json
+        
     - name: Create base environment files
       run: |
         echo "Creating base .env file..."
@@ -65,23 +77,15 @@ jobs:
         DB_TYPE=mongodb
         MONGO_SYNC_CONNECTION_STR=mongodb://mongo-db:27017
         MONGO_DATABASE=reso
-        MYSQL_HOST=mysql-db
-        MYSQL_DATABASE=reso_reference_db
-        MYSQL_USER=root
-        MYSQL_PASSWORD=password
-        MYSQL_ROOT_PASSWORD=password
-        MYSQL_ROOT_HOST=%
-        MYSQL_URL=jdbc:mysql://mysql-db:3306/reso_reference_db
         
         # Lookup Configuration
         LOOKUP_TYPE=STRING
         
         # Other Configuration
         CERT_REPORT_FILENAME=RESODataDictionary-2.0.metadata-report.json
-        ATLAS_DATAFILL_URI=
         
-        # JWT Secret
-        JWT_SECRET=${{ secrets.JWT_SECRET }}
+        # Web API Commander Path
+        WEB_API_COMMANDER_PATH=$GITHUB_WORKSPACE/../web-api-commander
         EOF
         
     - name: Set environment variables
@@ -143,8 +147,48 @@ jobs:
       run: |
         echo "Verifying .env file contents:"
         cat .env
+        echo ""
         echo "Build artifacts:"
         ls -la build/libs/ || echo "No build/libs directory found"
+        echo ""
+        echo "Verifying web-api-commander setup:"
+        ls -la ../web-api-commander/ || echo "Web-api-commander directory not found"
+        echo ""
+        echo "Checking refServLocal.json configuration:"
+        echo "📍 Current directory:"
+        if [ -f refServLocal.json ]; then
+          echo "✅ refServLocal.json found in current directory"
+        else
+          echo "❌ refServLocal.json not found in current directory"
+        fi
+        
+        echo "📍 Web-api-commander directory:"
+        if [ -f ../web-api-commander/refServLocal.json ]; then
+          echo "✅ refServLocal.json found in web-api-commander directory"
+        else
+          echo "❌ refServLocal.json not found in web-api-commander"
+          ls -la ../web-api-commander/ | head -5
+        fi
+        echo ""
+        echo "Checking if server is running:"
+        for i in {1..30}; do
+          if curl -f http://localhost:8080/core/2.0.0/ 2>/dev/null; then
+            echo "✅ Server is responding!"
+            break
+          else
+            echo "⏳ Waiting for server... (attempt $i/30)"
+            sleep 2
+          fi
+                 done
+        
+        # Final verification that server is ready
+        if ! curl -f http://localhost:8080/core/2.0.0/ 2>/dev/null; then
+          echo "❌ Server is not responding after 60 seconds, checking container status:"
+          docker ps -a
+          echo "Checking container logs:"
+          docker compose logs odata-manager-app || true
+          exit 1
+        fi
         
     - name: Run LookupStringTest
       run: |
