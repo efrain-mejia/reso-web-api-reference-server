@@ -205,6 +205,40 @@ jobs:
         else
           echo "⚠️  API test returned status code: $api_http_code"
           echo "This may be expected depending on server configuration"
+          
+          echo "=== DEBUG INFORMATION ==="
+          echo "Gathering debug information for MongoDB connection issue..."
+          
+          echo "--- Docker container status ---"
+          docker ps -a
+          
+          echo "--- Environment variables in use ---"
+          echo "DB_TYPE: $DB_TYPE"
+          echo "MONGO_DATABASE: $MONGO_DATABASE"
+          echo "MONGO_SYNC_CONNECTION_STR: $MONGO_SYNC_CONNECTION_STR"
+          
+          echo "--- Container environment variables ---"
+          echo "App container env vars:"
+          docker compose exec -T app env | grep -E "(MONGO|DB_)" || echo "Failed to get app container env vars"
+          
+          echo "--- MongoDB container logs ---"
+          docker compose logs mongo-db || echo "No mongo-db container found"
+          
+          echo "--- App container logs (last 50 lines) ---"
+          docker compose logs --tail=50 app || echo "Failed to get app container logs"
+          
+          echo "--- Network connectivity test ---"
+          echo "Testing connectivity from app to mongo-db..."
+          docker compose exec -T app ping -c 3 mongo-db || echo "Ping test failed"
+          
+          echo "--- MongoDB connection test ---"
+          echo "Testing MongoDB connection directly..."
+          docker compose exec -T mongo-db mongosh --eval "db.adminCommand('ping')" || echo "MongoDB connection test failed"
+          
+          echo "--- Checking if MongoDB is accepting connections ---"
+          docker compose exec -T app nc -zv mongo-db 27017 || echo "Port 27017 not reachable"
+          
+          echo "=== END DEBUG INFORMATION ==="
         fi
         
         echo "Server verification completed at: $(date)"
