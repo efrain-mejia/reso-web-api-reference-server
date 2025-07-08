@@ -20,6 +20,7 @@ import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriInfo;
 import org.apache.olingo.server.api.uri.UriParameter;
 import org.reso.service.data.common.CommonDataProcessing;
+import org.reso.service.data.mongodb.MongoDBManager;
 import org.reso.service.servlet.RESOservlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,16 +82,9 @@ public class ResourceInfo {
     }
 
     private static synchronized MongoClient getMongoClient() {
-        if (mongoClient == null && !syncConnStr.isEmpty()) {
+        if (mongoClient == null) {
             try {
-                com.mongodb.MongoClientSettings.Builder settingsBuilder = com.mongodb.MongoClientSettings.builder()
-                        .applyConnectionString(new com.mongodb.ConnectionString(syncConnStr))
-                        .applyToClusterSettings(builder -> builder.serverSelectionTimeout(5000, TimeUnit.MILLISECONDS))
-                        .applyToSocketSettings(builder -> builder.connectTimeout(5000, TimeUnit.MILLISECONDS)
-                                .readTimeout(5000, TimeUnit.MILLISECONDS))
-                        .applyToSslSettings(builder -> builder.enabled(true));
-
-                mongoClient = MongoClients.create(settingsBuilder.build());
+              mongoClient = MongoDBManager.getClient();
 
                 // Test the connection
                 mongoClient.getDatabase("admin").runCommand(new Document("ping", 1));

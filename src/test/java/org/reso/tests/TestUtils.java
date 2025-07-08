@@ -292,4 +292,47 @@ public class TestUtils {
 
         return exitCode;
     }
+
+    public static void waitForServerReady() throws IOException, InterruptedException {
+        LOGGER.info("Waiting for server to be ready...");
+        int maxAttempts = 24; // 2 minutes with 5-second intervals
+        int attempt = 0;
+        
+        while (attempt < maxAttempts) {
+            try {
+                // Test health endpoint to verify server is ready
+                ProcessBuilder curlBuilder = new ProcessBuilder(
+                    "curl", "-s", "-w", "%{http_code}", "-X", "GET", "http://localhost:8080/core/health"
+                );
+                
+                Process curlProcess = curlBuilder.start();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(curlProcess.getInputStream()));
+                StringBuilder response = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    response.append(line);
+                }
+                
+                int curlExitCode = curlProcess.waitFor();
+                String responseStr = response.toString();
+                
+                if (curlExitCode == 0 && responseStr.contains("200")) {
+                    LOGGER.info("Server is ready! Health endpoint responded successfully.");
+                    return;
+                }
+                
+                LOGGER.info("Attempt " + (attempt + 1) + "/" + maxAttempts + " - Server not ready yet. Response: " + responseStr);
+                
+            } catch (Exception e) {
+                LOGGER.info("Attempt " + (attempt + 1) + "/" + maxAttempts + " - Error checking server: " + e.getMessage());
+            }
+            
+            attempt++;
+            if (attempt < maxAttempts) {
+                Thread.sleep(5000); // Wait 5 seconds before next attempt
+            }
+        }
+        
+        throw new RuntimeException("Server failed to become ready within timeout period");
+    }
 }

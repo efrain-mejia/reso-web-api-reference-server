@@ -54,11 +54,11 @@ services:
     image: mongo:latest
     container_name: mongo-db
     environment:
-      MONGO_INITDB_DATABASE: ${MONGO_DATABASE}
-      CERT_REPORT_FILENAME: ${CERT_REPORT_FILENAME}
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE:-reso}
+      CERT_REPORT_FILENAME: RESODataDictionary-1.7.metadata-report.json
       ATLAS_DATAFILL_URI: ${ATLAS_DATAFILL_URI}
     volumes:
-      - "./${CERT_REPORT_FILENAME}:/${CERT_REPORT_FILENAME}"
+      - "./certification-reports/RESODataDictionary-1.7.metadata-report.json:/RESODataDictionary-1.7.metadata-report.json"
       - ./mongo-init-scripts:/docker-entrypoint-initdb.d
       - mongo_data:/data/db
     ports:
