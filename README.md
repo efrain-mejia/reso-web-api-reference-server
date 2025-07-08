@@ -8,13 +8,15 @@ In order to run your own local server you need a linux / Unix environment with t
 * docker-compose
 * wget or curl
 
-Run the `build.sh`
+Run the `docker-compose -f docker-compose.builder.yml --project-name builder-stack up --build`
 
 This will create everything to run the test server.
 
 ## Running the server
 
-Run the `run.sh`
+Run the server with `docker-compose up`
+
+To run with debug enabled `docker-compose -f docker-compose.yml -f docker-compose.dev.yml up`
 
 ## Access the Server
 
@@ -61,7 +63,7 @@ You can have your own SQL database.  Just copy the `env-default` file to `.env` 
 
 ### Prerequisites
 Before running the tests, ensure you have the following installed:
-- **Java 8+** (Ensure it's properly set in your environment)
+- **Java 17** (Ensure it's properly set in your environment)
 - **Gradle**
 - **Docker** (with Docker Compose)
 - **Node.js** (for `reso-certification-utils`)
